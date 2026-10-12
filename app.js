@@ -71,18 +71,6 @@ const sessionOptions = {
 //   res.send("Hi, I am root");
 // });
 
-// Add the redirect route right here:
-app.get("/", (req, res) => {
-  res.redirect("/listings");
-});
-
-app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
-  next();
-});
-
 
 
 app.use(session(sessionOptions));
@@ -96,16 +84,18 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 
+// 1. First, make sure the middleware runs for every request so currUser is defined
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  res.locals.currUser = req.user;
+  next();
+});
 
-// app.get("/demouser", async (req, res) => {
-//     let fakeUser = new User({
-//         email: "student@gmail.com",
-//         username: "delta-student",
-//     });
-
-//     let registeredUser = await User.register(fakeUser, "helloworld");
-//     res.send(registeredUser);
-// });
+// 2. Then place your root redirect route here
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
